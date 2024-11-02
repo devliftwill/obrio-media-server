@@ -1,0 +1,22 @@
+# Version control
+.git
+.gitignore
+
+# Dependencies
+node_modules
+npm-debug.log
+
+# Environment
+.env
+.env.*
+
+# Generated files
+frames/*
+
+# Editor files
+.vscode
+.idea
+
+# System files
+.DS_Store
+Thumbs.db

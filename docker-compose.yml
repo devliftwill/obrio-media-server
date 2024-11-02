@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  rtmp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "1935:1935"  # RTMP
+      - "8000:8000"  # HTTP
+    volumes:
+      - ./frames:/app/frames
+      - ${GOOGLE_APPLICATION_CREDENTIALS}:/app/google-credentials.json:ro
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/google-credentials.json
+    restart: unless-stopped

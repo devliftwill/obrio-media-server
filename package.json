@@ -1,0 +1,14 @@
+{
+  "name": "rtmp-vision-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "node-media-server": "^2.6.2",
+    "@google-cloud/vision": "^4.0.2",
+    "fluent-ffmpeg": "^2.1.2",
+    "node-fetch": "^3.3.2"
+  }
+}

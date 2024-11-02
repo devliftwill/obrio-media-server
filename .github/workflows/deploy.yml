@@ -1,0 +1,46 @@
+name: Deploy to Google Compute Engine
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCE_INSTANCE: rtmp-server
+  GCE_INSTANCE_ZONE: us-central1-a
+  IMAGE_NAME: rtmp-server
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Google Auth
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker
+
+      - name: Build and Push Container
+        run: |
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Deploy to GCE
+        run: |
+          # Update instance with new container
+          gcloud compute instances update-container ${{ env.GCE_INSTANCE }} \
+            --zone=${{ env.GCE_INSTANCE_ZONE }} \
+            --container-image=gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --container-mount-host-path=mount-path=/app/frames,host-path=/var/rtmp/frames \
+            --container-mount-host-path=mount-path=/app/google-credentials.json,host-path=/etc/google/auth/application_default_credentials.json,mode=ro \
+            --container-env=GOOGLE_APPLICATION_CREDENTIALS=/app/google-credentials.json
